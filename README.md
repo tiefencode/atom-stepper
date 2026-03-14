@@ -41,13 +41,13 @@ src/
 
 Typical PlatformIO workflow:
 
-### Build the firmware
+**1. Build the firmware**
 
 ```
 pio run
 ```
 
-### Flash the device
+**2. Flash the device**
 
 * Use `pio device list` or `ls /dev/cu.*` to find the current serial device
 * Replace `/dev/cu.usbserial-{YOUR-SERIAL-DEVICE-NUMBER}` with that device
@@ -56,7 +56,7 @@ pio run
 pio run -t upload --upload-port /dev/cu.usbserial-{YOUR-SERIAL-DEVICE-NUMBER}}
 ```
 
-### Open the serial monitor
+**3. Open the serial monitor**
 
 ```
 pio device monitor --port /dev/cu.usbserial-{YOUR-SERIAL-DEVICE-NUMBER} --baud 115200
