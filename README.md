@@ -64,10 +64,8 @@ pio device monitor --port /dev/cu.usbserial-{YOUR-SERIAL-DEVICE-NUMBER} --baud 1
 
 Other usefull commands:
 
-`pio run -t clean`
-`pio run -t compiledb`
-`pio device list`
-`ls /dev/cu.*`
+* `pio run -t clean`
+* `pio run -t compiledb`
 
 Notes:
 
