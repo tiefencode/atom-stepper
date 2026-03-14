@@ -1,37 +1,115 @@
+# StepVR ATOM Stepper
 
-This directory is intended for project header files.
+Firmware for an M5Stack ATOM Lite / ESP32 that turns stepper ticks from a Hall sensor into a forward BLE gamepad axis.
 
-A header file is a file containing C declarations and macro definitions
-to be shared between several project source files. You request the use of a
-header file in your project source file (C, C++, etc) located in `src` folder
-by including it, with the C preprocessing directive `#include'.
+## Hardware
 
-```src/main.c
+* M5Stack ATOM Lite
+* Hall sensor on `GPIO 32`
+* Internal RGB LED on `GPIO 27`
 
-#include "header.h"
+## Features
 
-int main (void)
-{
- ...
-}
+* Tick-based forward impulse model
+* Exponential decay between ticks
+* Dynamic hard stop when expected ticks stop
+* BLE gamepad output
+* LED status feedback
+
+## Project layout
+
+```
+include/
+  config.h
+  state.h
+  utils.h
+  sensor.h
+  motion.h
+  led_ui.h
+  ble_output.h
+
+src/
+  main.cpp
+  state.cpp
+  sensor.cpp
+  motion.cpp
+  led_ui.cpp
+  ble_output.cpp
 ```
 
-Including a header file produces the same results as copying the header file
-into each source file that needs it. Such copying would be time-consuming
-and error-prone. With a header file, the related declarations appear
-in only one place. If they need to be changed, they can be changed in one
-place, and programs that include the header file will automatically use the
-new version when next recompiled. The header file eliminates the labor of
-finding and changing all the copies as well as the risk that a failure to
-find one copy will result in inconsistencies within a program.
+## Build and flash
 
-In C, the convention is to give header files names that end with `.h'.
+Typical PlatformIO workflow:
 
-Read more about using header files in official GCC documentation:
+```
+pio run
+pio run -t upload --upload-port /dev/cu.usbserial-7552BB3538
+pio device monitor --port /dev/cu.usbserial-7552BB3538 --baud 115200
+```
 
-* Include Syntax
-* Include Operation
-* Once-Only Headers
-* Computed Includes
+Useful variants:
 
-https://gcc.gnu.org/onlinedocs/cpp/Header-Files.html
+```
+pio run -t clean
+pio run -t compiledb
+pio device list
+ls /dev/cu.*
+```
+
+Notes:
+
+* Use `pio device list` or `ls /dev/cu.*` to find the current serial device
+* Replace `/dev/cu.usbserial-7552BB3538` with that device
+* `pio run` builds the firmware
+* `pio run -t upload` flashes the device
+* `pio device monitor` opens the serial monitor
+* Close the serial monitor before flashing if the port is busy
+
+## Runtime model
+
+* Hall sensor input is debounced and re-armed on HIGH
+* A valid `HIGH -> LOW` transition registers one tick
+* Each tick adds a forward impulse
+* Speed decays exponentially between ticks
+* A stronger stop engages when the next expected tick is missed
+* Forward motion is sent as BLE gamepad Y axis
+
+## LED states
+
+* **Green**: short startup indication after boot/flash
+* **Red**: BLE not connected, delayed briefly after boot
+* **Blue**: motion active, pulse rate driven directly by `currentSpeed`
+* **Dim green blink**: connected idle heartbeat
+* **Off**: connected idle outside heartbeat window
+
+## Main tuning values
+
+### Motion feel
+
+* `BASE`
+* `GAIN`
+* `CMIN`
+* `CMAX`
+* `IGAMMA`
+* `DECAY`
+
+### Hard stop
+
+* `STOP_TRIGGER_FACTOR`
+* `STOP_MIN_MS`
+* `STOP_MAX_MS`
+* `STOP_RATE`
+* `STOP_CUTOFF`
+
+### LED
+
+* `LED_SPEED_DIVISOR`
+* `LED_OFF_HOLD_MS`
+* `LED_MOVE_BLUE_DIM`
+* `LED_MOVE_BLUE_BRIGHT`
+
+## Notes
+
+* `LED_SPEED_DIVISOR` is the main LED pulse tuning value
+* Higher `LED_SPEED_DIVISOR` = slower blue pulsing
+* Current split keeps the existing behavior and prepares the codebase for further cleanup
