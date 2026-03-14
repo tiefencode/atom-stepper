@@ -42,8 +42,8 @@ void setup() {
   lastRawChangeMs = nowMs;
   stableSinceMs = nowMs;
   lastLoopMs = nowMs;
-  startupGreenUntilMs = nowMs + STARTUP_GREEN_DURATION_MS;
-  redEnableAtMs = nowMs + RED_ENABLE_DELAY_MS;
+  ledStartupGreenUntilMs = nowMs + LED_STARTUP_GREEN_DURATION_MS;
+  ledRedEnableAtMs = nowMs + LED_RED_ENABLE_DELAY_MS;
 
   // Only arm immediately if the sensor is idle-high at boot.
   sensorArmed = (stableState == HIGH);

@@ -30,8 +30,8 @@ extern uint32_t lastPrintMs;
 extern uint32_t lastLoopMs;
 
 // LED state
-extern uint32_t startupGreenUntilMs;
-extern uint32_t redEnableAtMs;
+extern uint32_t ledStartupGreenUntilMs;
+extern uint32_t ledRedEnableAtMs;
 extern uint32_t lastLedUpdateMs;
 extern uint8_t lastLedR;
 extern uint8_t lastLedG;

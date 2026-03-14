@@ -28,8 +28,8 @@ uint32_t lastPrintMs = 0;
 uint32_t lastLoopMs = 0;
 
 // LED state
-uint32_t startupGreenUntilMs = 0;
-uint32_t redEnableAtMs = 0;
+uint32_t ledStartupGreenUntilMs = 0;
+uint32_t ledRedEnableAtMs = 0;
 uint32_t lastLedUpdateMs = 0;
 uint8_t lastLedR = 255;
 uint8_t lastLedG = 255;

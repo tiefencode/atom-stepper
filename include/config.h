@@ -44,15 +44,15 @@ static const int AXIS_CENTER = 16384;
 static const int AXIS_MAX = 32767;
 
 // LED behavior
-static const uint32_t STARTUP_GREEN_DURATION_MS = 1000;   // show green briefly after boot/flash
-static const uint32_t RED_ENABLE_DELAY_MS = 3000;         // do not show red immediately after boot
-static const uint8_t STARTUP_GREEN_BRIGHTNESS = 20;       // startup green brightness
-static const uint8_t LED_DISCONNECTED_RED = 6;            // BLE not connected
-static const uint32_t LED_REFRESH_MS = 40;                // throttle LED updates to reduce power + bus activity
-static const uint32_t LED_OFF_HOLD_MS = 2200;             // only turn LED fully off after real inactivity
-static const float LED_SPEED_DIVISOR = 9000.0f;           // single tuning value for speed -> pulse period
-static const uint8_t LED_MOVE_BLUE_DIM = 1;               // minimum blue while motion is active
-static const uint8_t LED_MOVE_BLUE_BRIGHT = 8;            // maximum blue while motion is active
-static const uint32_t IDLE_HEARTBEAT_INTERVAL_MS = 10000; // connected idle heartbeat interval
-static const uint32_t IDLE_HEARTBEAT_ON_MS = 40;          // connected idle heartbeat on-time
-static const uint8_t IDLE_HEARTBEAT_GREEN = 1;            // connected idle heartbeat brightness
+static const uint32_t LED_STARTUP_GREEN_DURATION_MS = 1000;       // show green briefly after boot/flash
+static const uint8_t LED_STARTUP_GREEN_BRIGHTNESS = 20;           // startup green brightness
+static const uint32_t LED_RED_ENABLE_DELAY_MS = 3000;             // do not show red immediately after boot
+static const uint8_t LED_DISCONNECTED_RED_BRIGHTNESS = 6;         // BLE not connected
+static const uint32_t LED_REFRESH_MS = 40;                        // throttle LED updates to reduce power + bus activity
+static const uint32_t LED_OFF_HOLD_MS = 2200;                     // only turn LED fully off after real inactivity
+static const float LED_SPEED_DIVISOR = 9000.0f;                   // single tuning value for speed -> pulse period
+static const uint8_t LED_MOVE_BLUE_DIM_BRIGHTNESS = 1;            // minimum blue while motion is active
+static const uint8_t LED_MOVE_BLUE_BRIGHT_BRIGHTNESS = 8;         // maximum blue while motion is active
+static const uint32_t LED_IDLE_HEARTBEAT_INTERVAL_MS = 10000;     // connected idle heartbeat interval
+static const uint32_t LED_IDLE_HEARTBEAT_ON_MS = 40;              // connected idle heartbeat on-time
+static const uint8_t LED_IDLE_HEARTBEAT_GREEN_BRIGHTNESS = 1;     // connected idle heartbeat brightness
