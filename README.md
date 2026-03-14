@@ -37,23 +37,41 @@ src/
   ble_output.cpp
 ```
 
-## Build
+## Build and flash
 
-Example `platformio.ini`:
+Typical PlatformIO workflow:
+
+### Build the firmware
 
 ```
-[env:m5stack-atom]
-platform = espressif32
-board = m5stack-atom
-framework = arduino
-
-monitor_speed = 115200
-
-lib_deps =
-  lemmingdev/ESP32-BLE-Gamepad @ ^0.7.3
-  h2zero/NimBLE-Arduino @ ^2.2.1
-  jasonlzt/FastLED
+pio run
 ```
+
+### Flash the device
+
+* Use `pio device list` or `ls /dev/cu.*` to find the current serial device
+* Replace `/dev/cu.usbserial-{YOUR-SERIAL-DEVICE-NUMBER}` with that device
+
+```
+pio run -t upload --upload-port /dev/cu.usbserial-{YOUR-SERIAL-DEVICE-NUMBER}}
+```
+
+### Open the serial monitor
+
+```
+pio device monitor --port /dev/cu.usbserial-{YOUR-SERIAL-DEVICE-NUMBER} --baud 115200
+```
+
+Other usefull commands:
+
+`pio run -t clean`
+`pio run -t compiledb`
+`pio device list`
+`ls /dev/cu.*`
+
+Notes:
+
+* Close the serial monitor before flashing if the port is busy
 
 ## Runtime model
 
