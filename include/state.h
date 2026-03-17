@@ -37,6 +37,8 @@ struct LedState {
   uint8_t lastLedR = 255;
   uint8_t lastLedG = 255;
   uint8_t lastLedB = 255;
+  float ledPulsePhase = 0.0f;
+  uint32_t lastLedPhaseStepMs = 0;
 };
 
 extern BleGamepad bleGamepad;

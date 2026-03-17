@@ -3,6 +3,46 @@
 #include "state.h"
 #include "utils.h"
 
+static float wrapPhase01(float phase) {
+  while (phase >= 1.0f) {
+    phase -= 1.0f;
+  }
+
+  while (phase < 0.0f) {
+    phase += 1.0f;
+  }
+
+  return phase;
+}
+
+static float pulseFromPhase(float phase) {
+  return 0.5f - (0.5f * cosf(wrapPhase01(phase) * 2.0f * PI));
+}
+
+static float advanceLedPulsePhase(uint32_t nowMs, float speed) {
+  const float clampedSpeed = (speed > 0.0001f) ? speed : 0.0001f;
+  const float pulseMs = LED_SPEED_DIVISOR / clampedSpeed;
+
+  if (ledState.lastLedPhaseStepMs == 0) {
+    ledState.lastLedPhaseStepMs = nowMs;
+    return ledState.ledPulsePhase;
+  }
+
+  const uint32_t deltaMs = nowMs - ledState.lastLedPhaseStepMs;
+  ledState.lastLedPhaseStepMs = nowMs;
+
+  if (pulseMs <= 1.0f) {
+    ledState.ledPulsePhase = 0.0f;
+    return ledState.ledPulsePhase;
+  }
+
+  ledState.ledPulsePhase = wrapPhase01(
+    ledState.ledPulsePhase + (static_cast<float>(deltaMs) / pulseMs)
+  );
+
+  return ledState.ledPulsePhase;
+}
+
 static void applyLedRgb(uint8_t r, uint8_t g, uint8_t b) {
   if (ledState.lastLedR == r &&
       ledState.lastLedG == g &&
@@ -51,6 +91,9 @@ void updateLed(uint32_t nowMs) {
   }
 
   if (!motionActive) {
+    ledState.ledPulsePhase = 0.0f;
+    ledState.lastLedPhaseStepMs = nowMs;
+
     const uint32_t phaseMs = nowMs % LED_IDLE_HEARTBEAT_INTERVAL_MS;
     if (phaseMs < LED_IDLE_HEARTBEAT_ON_MS) {
       applyLedRgb(0, LED_IDLE_HEARTBEAT_GREEN_BRIGHTNESS, 0);
@@ -61,9 +104,9 @@ void updateLed(uint32_t nowMs) {
   }
 
   // Pulse rate is driven directly by the current speed.
-  const float speed = (motionState.currentSpeed > 0.0001f) ? motionState.currentSpeed : 0.0001f;
-  const uint32_t pulseMs = static_cast<uint32_t>(lroundf(LED_SPEED_DIVISOR / speed));
-  const float pulse = pulse01(nowMs, pulseMs);
+  const float pulse = pulseFromPhase(
+    advanceLedPulsePhase(nowMs, motionState.currentSpeed)
+  );
   const uint8_t blue = lerp8_local(
     LED_MOVE_BLUE_DIM_BRIGHTNESS,
     LED_MOVE_BLUE_BRIGHT_BRIGHTNESS,
