@@ -26,7 +26,6 @@ struct MotionState {
 
 struct TimingState {
   uint32_t lastBleUpdateMs = 0;
-  uint32_t lastPrintMs = 0;
   uint32_t lastLoopMs = 0;
 };
 
