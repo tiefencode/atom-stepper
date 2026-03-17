@@ -4,24 +4,25 @@
 #include "utils.h"
 
 void pushInterval(uint32_t ms) {
-  intervalBuf[intervalWrite] = ms;
-  intervalWrite = (intervalWrite + 1) % INTERVAL_BUF;
+  cadenceState.intervalBuf[cadenceState.intervalWrite] = ms;
+  cadenceState.intervalWrite = (cadenceState.intervalWrite + 1) % INTERVAL_BUF;
 
-  if (intervalCount < INTERVAL_BUF) {
-    intervalCount++;
+  if (cadenceState.intervalCount < INTERVAL_BUF) {
+    cadenceState.intervalCount++;
   }
 }
 
 float averageIntervalMs() {
-  if (intervalCount <= 0) {
+  if (cadenceState.intervalCount <= 0) {
     return 0.0f;
   }
 
   uint64_t sum = 0;
-  for (int i = 0; i < intervalCount; ++i) {
-    sum += intervalBuf[i];
+  for (int i = 0; i < cadenceState.intervalCount; ++i) {
+    sum += cadenceState.intervalBuf[i];
   }
-  return static_cast<float>(sum) / static_cast<float>(intervalCount);
+
+  return static_cast<float>(sum) / static_cast<float>(cadenceState.intervalCount);
 }
 
 float computeCadencePerMin() {
@@ -29,6 +30,7 @@ float computeCadencePerMin() {
   if (avgMs <= 0.0f) {
     return 0.0f;
   }
+
   return 60000.0f / avgMs;
 }
 
@@ -70,35 +72,39 @@ uint32_t computeStopTriggerMs() {
 }
 
 void registerTick(uint32_t nowMs) {
-  if (lastTickMs != 0 && nowMs > lastTickMs) {
-    pushInterval(nowMs - lastTickMs);
+  if (cadenceState.lastTickMs != 0 && nowMs > cadenceState.lastTickMs) {
+    pushInterval(nowMs - cadenceState.lastTickMs);
   }
 
-  lastTickMs = nowMs;
-  tickCount++;
+  cadenceState.lastTickMs = nowMs;
+  cadenceState.tickCount++;
 
-  cadencePerMin = computeCadencePerMin();
-  currentImpulse = computeImpulse(cadencePerMin);
+  cadenceState.cadencePerMin = computeCadencePerMin();
+  motionState.currentImpulse = computeImpulse(cadenceState.cadencePerMin);
 
   // Each valid tick adds a forward impulse.
-  currentSpeed = clampf_local(currentSpeed + currentImpulse, 0.0f, 1.0f);
+  motionState.currentSpeed = clampf_local(
+    motionState.currentSpeed + motionState.currentImpulse,
+    0.0f,
+    1.0f
+  );
 }
 
 void updateCadenceTimeout(uint32_t nowMs) {
-  if (lastTickMs == 0) {
-    cadencePerMin = 0.0f;
-    currentImpulse = 0.0f;
+  if (cadenceState.lastTickMs == 0) {
+    cadenceState.cadencePerMin = 0.0f;
+    motionState.currentImpulse = 0.0f;
     return;
   }
 
-  if ((nowMs - lastTickMs) > CADENCE_TIMEOUT_MS) {
-    cadencePerMin = 0.0f;
+  if ((nowMs - cadenceState.lastTickMs) > CADENCE_TIMEOUT_MS) {
+    cadenceState.cadencePerMin = 0.0f;
   }
 }
 
 void updateSpeedDecay(uint32_t nowMs) {
-  const uint32_t deltaMs = nowMs - lastLoopMs;
-  lastLoopMs = nowMs;
+  const uint32_t deltaMs = nowMs - timingState.lastLoopMs;
+  timingState.lastLoopMs = nowMs;
 
   if (deltaMs == 0) {
     return;
@@ -106,28 +112,28 @@ void updateSpeedDecay(uint32_t nowMs) {
 
   const float dt = static_cast<float>(deltaMs) / 1000.0f;
 
-  if (lastTickMs == 0) {
-    currentSpeed = 0.0f;
-    currentImpulse = 0.0f;
+  if (cadenceState.lastTickMs == 0) {
+    motionState.currentSpeed = 0.0f;
+    motionState.currentImpulse = 0.0f;
     return;
   }
 
-  const uint32_t sinceLastTickMs = nowMs - lastTickMs;
+  const uint32_t sinceLastTickMs = nowMs - cadenceState.lastTickMs;
   const uint32_t stopTriggerMs = computeStopTriggerMs();
   const bool hardStopActive = (sinceLastTickMs > stopTriggerMs);
 
   if (hardStopActive) {
-    currentImpulse = 0.0f;
-    currentSpeed *= expf(-STOP_RATE * dt);
+    motionState.currentImpulse = 0.0f;
+    motionState.currentSpeed *= expf(-STOP_RATE * dt);
 
-    if (currentSpeed < STOP_CUTOFF) {
-      currentSpeed = 0.0f;
+    if (motionState.currentSpeed < STOP_CUTOFF) {
+      motionState.currentSpeed = 0.0f;
     }
   } else {
-    currentSpeed *= expf(-DECAY * dt);
+    motionState.currentSpeed *= expf(-DECAY * dt);
 
-    if (currentSpeed < 0.0005f) {
-      currentSpeed = 0.0f;
+    if (motionState.currentSpeed < 0.0005f) {
+      motionState.currentSpeed = 0.0f;
     }
   }
 }

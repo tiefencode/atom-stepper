@@ -11,26 +11,26 @@ static void printDebug(uint32_t nowMs) {
     return;
   }
 
-  if ((nowMs - lastPrintMs) < PRINT_MS) {
+  if ((nowMs - timingState.lastPrintMs) < PRINT_MS) {
     return;
   }
 
-  lastPrintMs = nowMs;
+  timingState.lastPrintMs = nowMs;
 
   const int x = AXIS_CENTER;
-  const int y = speedToAxisY(currentSpeed);
+  const int y = speedToAxisY(motionState.currentSpeed);
 
   Serial.printf(
     "conn=%s stable=%s ticks=%lu cadence=%.1f/min impulse=%.2f speed=%.2f x=%d y=%d intervals=%d\n",
     bleGamepad.isConnected() ? "yes" : "no",
-    (stableState == LOW) ? "LOW" : "HIGH",
-    static_cast<unsigned long>(tickCount),
-    cadencePerMin,
-    currentImpulse,
-    currentSpeed,
+    (sensorState.stableState == LOW) ? "LOW" : "HIGH",
+    static_cast<unsigned long>(cadenceState.tickCount),
+    cadenceState.cadencePerMin,
+    motionState.currentImpulse,
+    motionState.currentSpeed,
     x,
     y,
-    intervalCount
+    cadenceState.intervalCount
   );
 }
 
@@ -43,16 +43,16 @@ void setup() {
   setupLed();
 
   const uint32_t nowMs = millis();
-  lastRawState = digitalRead(HALL_PIN);
-  stableState = lastRawState;
-  lastRawChangeMs = nowMs;
-  stableSinceMs = nowMs;
-  lastLoopMs = nowMs;
-  ledStartupGreenUntilMs = nowMs + LED_STARTUP_GREEN_DURATION_MS;
-  ledRedEnableAtMs = nowMs + LED_RED_ENABLE_DELAY_MS;
+  sensorState.lastRawState = digitalRead(HALL_PIN);
+  sensorState.stableState = sensorState.lastRawState;
+  sensorState.lastRawChangeMs = nowMs;
+  sensorState.stableSinceMs = nowMs;
+  timingState.lastLoopMs = nowMs;
+  ledState.ledStartupGreenUntilMs = nowMs + LED_STARTUP_GREEN_DURATION_MS;
+  ledState.ledRedEnableAtMs = nowMs + LED_RED_ENABLE_DELAY_MS;
 
   // Only arm immediately if the sensor is idle-high at boot.
-  sensorArmed = (stableState == HIGH);
+  sensorState.sensorArmed = (sensorState.stableState == HIGH);
 
   if (DEBUG_LOG_ENABLED) {
     Serial.println();

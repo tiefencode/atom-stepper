@@ -6,30 +6,32 @@
 void updateSensor(uint32_t nowMs) {
   const int rawState = digitalRead(HALL_PIN);
 
-  if (rawState != lastRawState) {
-    lastRawState = rawState;
-    lastRawChangeMs = nowMs;
+  if (rawState != sensorState.lastRawState) {
+    sensorState.lastRawState = rawState;
+    sensorState.lastRawChangeMs = nowMs;
   }
 
-  if ((nowMs - lastRawChangeMs) < DEBOUNCE_MS) {
+  if ((nowMs - sensorState.lastRawChangeMs) < DEBOUNCE_MS) {
     return;
   }
 
-  if (rawState != stableState) {
-    stableState = rawState;
-    stableSinceMs = nowMs;
+  if (rawState != sensorState.stableState) {
+    sensorState.stableState = rawState;
+    sensorState.stableSinceMs = nowMs;
 
     // Count one tick on HIGH -> LOW, but only after the sensor
     // stayed HIGH long enough to re-arm.
-    if (stableState == LOW) {
-      if (sensorArmed) {
+    if (sensorState.stableState == LOW) {
+      if (sensorState.sensorArmed) {
         registerTick(nowMs);
-        sensorArmed = false;
+        sensorState.sensorArmed = false;
       }
     }
   }
 
-  if (stableState == HIGH && !sensorArmed && (nowMs - stableSinceMs) >= ARM_HIGH_MS) {
-    sensorArmed = true;
+  if (sensorState.stableState == HIGH &&
+      !sensorState.sensorArmed &&
+      (nowMs - sensorState.stableSinceMs) >= ARM_HIGH_MS) {
+    sensorState.sensorArmed = true;
   }
 }

@@ -4,13 +4,15 @@
 #include "utils.h"
 
 static void applyLedRgb(uint8_t r, uint8_t g, uint8_t b) {
-  if (lastLedR == r && lastLedG == g && lastLedB == b) {
+  if (ledState.lastLedR == r &&
+      ledState.lastLedG == g &&
+      ledState.lastLedB == b) {
     return;
   }
 
-  lastLedR = r;
-  lastLedG = g;
-  lastLedB = b;
+  ledState.lastLedR = r;
+  ledState.lastLedG = g;
+  ledState.lastLedB = b;
 
   leds[0] = CRGB(r, g, b);
   FastLED.show();
@@ -22,19 +24,19 @@ void setupLed() {
 }
 
 void updateLed(uint32_t nowMs) {
-  if ((nowMs - lastLedUpdateMs) < LED_REFRESH_MS) {
+  if ((nowMs - ledState.lastLedUpdateMs) < LED_REFRESH_MS) {
     return;
   }
 
-  lastLedUpdateMs = nowMs;
+  ledState.lastLedUpdateMs = nowMs;
 
-  if (nowMs < ledStartupGreenUntilMs) {
+  if (nowMs < ledState.ledStartupGreenUntilMs) {
     applyLedRgb(0, LED_STARTUP_GREEN_BRIGHTNESS, 0);
     return;
   }
 
   if (!bleGamepad.isConnected()) {
-    if (nowMs >= ledRedEnableAtMs) {
+    if (nowMs >= ledState.ledRedEnableAtMs) {
       applyLedRgb(LED_DISCONNECTED_RED_BRIGHTNESS, 0, 0);
     } else {
       applyLedRgb(0, 0, 0);
@@ -43,8 +45,8 @@ void updateLed(uint32_t nowMs) {
   }
 
   bool motionActive = false;
-  if (lastTickMs != 0) {
-    const uint32_t sinceLastTickMs = nowMs - lastTickMs;
+  if (cadenceState.lastTickMs != 0) {
+    const uint32_t sinceLastTickMs = nowMs - cadenceState.lastTickMs;
     motionActive = (sinceLastTickMs <= LED_OFF_HOLD_MS);
   }
 
@@ -59,10 +61,14 @@ void updateLed(uint32_t nowMs) {
   }
 
   // Pulse rate is driven directly by the current speed.
-  const float speed = (currentSpeed > 0.0001f) ? currentSpeed : 0.0001f;
+  const float speed = (motionState.currentSpeed > 0.0001f) ? motionState.currentSpeed : 0.0001f;
   const uint32_t pulseMs = static_cast<uint32_t>(lroundf(LED_SPEED_DIVISOR / speed));
   const float pulse = pulse01(nowMs, pulseMs);
-  const uint8_t blue = lerp8_local(LED_MOVE_BLUE_DIM_BRIGHTNESS, LED_MOVE_BLUE_BRIGHT_BRIGHTNESS, pulse);
+  const uint8_t blue = lerp8_local(
+    LED_MOVE_BLUE_DIM_BRIGHTNESS,
+    LED_MOVE_BLUE_BRIGHT_BRIGHTNESS,
+    pulse
+  );
 
   applyLedRgb(0, 0, blue);
 }
