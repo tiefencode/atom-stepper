@@ -7,6 +7,10 @@
 #include "state.h"
 
 static void printDebug(uint32_t nowMs) {
+  if (!DEBUG_LOG_ENABLED) {
+    return;
+  }
+
   if ((nowMs - lastPrintMs) < PRINT_MS) {
     return;
   }
@@ -31,7 +35,9 @@ static void printDebug(uint32_t nowMs) {
 }
 
 void setup() {
-  Serial.begin(115200);
+  if (DEBUG_LOG_ENABLED) {
+    Serial.begin(115200);
+  }
 
   pinMode(HALL_PIN, INPUT);
   setupLed();
@@ -48,22 +54,24 @@ void setup() {
   // Only arm immediately if the sensor is idle-high at boot.
   sensorArmed = (stableState == HIGH);
 
-  Serial.println();
-  Serial.println("BUILD: impulse-decay-v3-split");
-  Serial.printf(
-    "BASE=%.2f GAIN=%.2f CMIN=%.1f CMAX=%.1f IGAMMA=%.2f DECAY=%.2f STOP_F=%.2f STOP_MIN=%lu STOP_MAX=%lu STOP_RATE=%.2f STOP_CUT=%.3f BUF=%d BLE=%lu PRINT=%lu\n",
-    BASE, GAIN, CMIN, CMAX, IGAMMA, DECAY,
-    STOP_TRIGGER_FACTOR,
-    static_cast<unsigned long>(STOP_MIN_MS),
-    static_cast<unsigned long>(STOP_MAX_MS),
-    STOP_RATE, STOP_CUTOFF,
-    INTERVAL_BUF,
-    static_cast<unsigned long>(BLE_UPDATE_MS),
-    static_cast<unsigned long>(PRINT_MS)
-  );
-  Serial.println("Impulse per tick + exponential decay between ticks");
-  Serial.println("Dynamic hard stop after the expected next step is missed");
-  Serial.println("Starting BLE gamepad...");
+  if (DEBUG_LOG_ENABLED) {
+    Serial.println();
+    Serial.println("BUILD: impulse-decay-v3-split");
+    Serial.printf(
+      "BASE=%.2f GAIN=%.2f CMIN=%.1f CMAX=%.1f IGAMMA=%.2f DECAY=%.2f STOP_F=%.2f STOP_MIN=%lu STOP_MAX=%lu STOP_RATE=%.2f STOP_CUT=%.3f BUF=%d BLE=%lu PRINT=%lu\n",
+      BASE, GAIN, CMIN, CMAX, IGAMMA, DECAY,
+      STOP_TRIGGER_FACTOR,
+      static_cast<unsigned long>(STOP_MIN_MS),
+      static_cast<unsigned long>(STOP_MAX_MS),
+      STOP_RATE, STOP_CUTOFF,
+      INTERVAL_BUF,
+      static_cast<unsigned long>(BLE_UPDATE_MS),
+      static_cast<unsigned long>(PRINT_MS)
+    );
+    Serial.println("Impulse per tick + exponential decay between ticks");
+    Serial.println("Dynamic hard stop after the expected next step is missed");
+    Serial.println("Starting BLE gamepad...");
+  }
 
   bleGamepad.begin();
 }
