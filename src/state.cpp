@@ -7,4 +7,5 @@ SensorState sensorState;
 CadenceState cadenceState;
 MotionState motionState;
 TimingState timingState;
+BatteryState batteryState;
 LedState ledState;

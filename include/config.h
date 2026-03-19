@@ -6,6 +6,7 @@
 #include <math.h>
 
 static const int HALL_PIN = 32;
+static const int BATTERY_ADC_PIN = 33;
 static const int LED_PIN = 27;
 static const int LED_COUNT = 1;
 
@@ -18,6 +19,9 @@ static const uint32_t BLE_UPDATE_MS = 20;
 static const uint32_t CADENCE_TIMEOUT_MS = 1500;
 static const uint32_t MAIN_LOOP_DELAY_MS = 4;
 static const int8_t BLE_TX_POWER_DBM = 0;
+static const uint32_t BATTERY_SAMPLE_MS = 2000;
+static const uint32_t BATTERY_NOTIFY_MS = 15000;
+static const uint8_t BATTERY_SAMPLE_COUNT = 8;
 
 // CPU
 static const uint32_t CPU_FREQUENCY_MHZ = 80;

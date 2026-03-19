@@ -29,6 +29,16 @@ struct TimingState {
   uint32_t lastLoopMs = 0;
 };
 
+struct BatteryState {
+  uint32_t sampleSumMv = 0;
+  uint8_t sampleCount = 0;
+  uint32_t lastSampleMs = 0;
+  uint32_t lastNotifyMs = 0;
+  uint16_t batteryMv = 0;
+  uint8_t batteryPercent = 100;
+  uint8_t lastSentPercent = 255;
+};
+
 struct LedState {
   uint32_t ledStartupGreenUntilMs = 0;
   uint32_t ledRedEnableAtMs = 0;
@@ -45,4 +55,5 @@ extern SensorState sensorState;
 extern CadenceState cadenceState;
 extern MotionState motionState;
 extern TimingState timingState;
+extern BatteryState batteryState;
 extern LedState ledState;

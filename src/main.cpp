@@ -1,5 +1,6 @@
 #include "config.h"
 
+#include "battery.h"
 #include "ble_output.h"
 #include "led_ui.h"
 #include "motion.h"
@@ -11,6 +12,7 @@ void setup() {
 
   pinMode(HALL_PIN, INPUT);
   setupLed();
+  setupBattery();
 
   const uint32_t nowMs = millis();
   sensorState.lastRawState = digitalRead(HALL_PIN);
@@ -34,6 +36,7 @@ void loop() {
   updateSpeedDecay(nowMs);
   updateSensor(nowMs);
   updateCadenceTimeout(nowMs);
+  updateBattery(nowMs);
   updateLed(nowMs);
   sendGamepad(nowMs);
 
